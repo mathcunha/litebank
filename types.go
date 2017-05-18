@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+type Entity interface {
+	create() error
+	newEntity() Entity
+}
+
 type Costumer struct {
 	Id           string
 	Name         string

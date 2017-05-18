@@ -1,61 +1,55 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
-	"github.com/satori/go.uuid"
-	"time"
+	"log"
+	"net/http"
+	"os"
 )
 
-func newAccount(c Costumer, number string) (a *Account) {
-	a = &Account{Id: uuid.NewV4().String(), Number: number, Costumer: c}
+type defaulEntityHandler struct {
+	entity Entity
+}
+
+var v1Path = "/api/v1/"
+
+func listen() error {
+	http.Handle(v1Path+"costumer", &defaulEntityHandler{&Costumer{}})
+	http.Handle(v1Path+"account", &defaulEntityHandler{&Account{}})
+	return http.ListenAndServe(getPort(), nil)
+}
+
+func (h *defaulEntityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		decoder := json.NewDecoder(r.Body)
+		entity := h.entity.newEntity()
+		if err := decoder.Decode(entity); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if err := entity.create(); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		if err := json.NewEncoder(w).Encode(entity); err != nil {
+			log.Println("SEVERE: %v error returning json response %v\n", err, entity)
+		}
+		return
+	}
+	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.Write(nil)
 	return
 }
 
-func newConsumer(name string) (c *Costumer) {
-	c = &Costumer{Name: name, Id: uuid.NewV4().String(), Creation: time.Now()}
-	return
-}
-
-func newAccountEvent(a *Account) (e *Event, err error) {
-	return newEvent(*a, NewAccountEvent)
-}
-
-func newConsumerEvent(c *Costumer) (e *Event, err error) {
-	return newEvent(*c, NewCostumerEvent)
-}
-
-func newEvent(v interface{}, eventType EventType) (e *Event, err error) {
-	body, err := getJson(v)
-	if err != nil {
-		return nil, err
+func getPort() string {
+	var port = os.Getenv("PORT")
+	// Set a default port if there is nothing in the environment
+	if port == "" {
+		port = "8080"
+		log.Println("INFO: No PORT environment variable detected, defaulting to " + port)
 	}
-
-	e = &Event{Type: eventType, Body: body}
-	fmt.Printf("Event(%v) - body (%v)\n", eventType, body)
-
-	return e, nil
-}
-
-func createAccount(c Costumer, number string) (a *Account, err error) {
-	a = newAccount(c, number)
-	newAccountEvent(a)
-	return a, nil
-}
-
-func createConsumer(name string) (c *Costumer, err error) {
-	c = newConsumer(name)
-	newConsumerEvent(c)
-	return c, nil
-}
-
-func getJson(v interface{}) (body string, e error) {
-	buffer := bytes.NewBufferString(body)
-	enc := json.NewEncoder(buffer)
-	e = enc.Encode(v)
-	if e != nil {
-		return body, e
-	}
-	return buffer.String(), nil
+	return ":" + port
 }

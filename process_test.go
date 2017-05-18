@@ -5,10 +5,10 @@ import (
 )
 
 func TestCreateConsumer(t *testing.T) {
-	createConsumer("matheus")
+	//createConsumer("matheus")
 }
 
 func TestCreateAccount(t *testing.T) {
-	c, _ := createConsumer("matheus")
-	createAccount(*c, "12344")
+	//c, _ := createConsumer("matheus")
+	//createAccount(*c, "12344")
 }

@@ -1,7 +1,21 @@
 package main
 
-import "fmt"
+import (
+	"flag"
+)
+
+var server bool
+
+func init() {
+	flag.BoolVar(&server, "server", false, "starts as litebank http server")
+}
 
 func main() {
-	fmt.Println("vim-go")
+	flag.Parse()
+	if server {
+		err := listen()
+		if err != nil {
+			panic(err)
+		}
+	}
 }
