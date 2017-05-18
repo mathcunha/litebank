@@ -14,8 +14,8 @@ type defaulEntityHandler struct {
 var v1Path = "/api/v1/"
 
 func listen() error {
-	http.Handle(v1Path+"costumer", &defaulEntityHandler{&Costumer{}})
-	http.Handle(v1Path+"account", &defaulEntityHandler{&Account{}})
+	http.Handle(v1Path+"costumer/", &defaulEntityHandler{&Costumer{}})
+	http.Handle(v1Path+"account/", &defaulEntityHandler{&Account{}})
 	return http.ListenAndServe(getPort(), nil)
 }
 
