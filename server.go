@@ -12,11 +12,24 @@ type defaulEntityHandler struct {
 }
 
 var v1Path = "/api/v1/"
+var kProducer KafkaProducer
+var kConsumer KafkaConsumer
 
 func listen() error {
+	p, err := newKafkaSyncProducer()
+	if err != nil {
+		return err
+	}
+	kProducer = KafkaProducer{make(chan *Event, 10), p}
+	kProducer.start()
+
 	http.Handle(v1Path+"costumer/", &defaulEntityHandler{&Costumer{}})
 	http.Handle(v1Path+"account/", &defaulEntityHandler{&Account{}})
-	return http.ListenAndServe(getPort(), nil)
+	if err := http.ListenAndServe(getPort(), nil); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (h *defaulEntityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -28,9 +41,11 @@ func (h *defaulEntityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		if err := entity.create(); err != nil {
+		if event, err := entity.create(); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		} else {
+			kProducer.c <- event
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)

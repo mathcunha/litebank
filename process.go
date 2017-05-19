@@ -32,21 +32,19 @@ func (c *Costumer) newEntity() Entity {
 	return &Costumer{}
 }
 
-func (c *Costumer) create() (err error) {
+func (c *Costumer) create() (e *Event, err error) {
 	c.Id = uuid.NewV4().String()
 	c.Creation = time.Now()
-	_, err = newConsumerEvent(c)
-	return err
+	return newConsumerEvent(c)
 }
 
 func (a *Account) newEntity() Entity {
 	return &Account{}
 }
 
-func (a *Account) create() (err error) {
+func (a *Account) create() (e *Event, err error) {
 	a.Id = uuid.NewV4().String()
-	_, err = newAccountEvent(a)
-	return err
+	return newAccountEvent(a)
 }
 
 func getJson(v interface{}) (body string, e error) {

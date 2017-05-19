@@ -5,7 +5,7 @@ import (
 )
 
 type Entity interface {
-	create() error
+	create() (*Event, error)
 	newEntity() Entity
 }
 

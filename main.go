@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 )
 
 var server bool
@@ -22,6 +21,9 @@ func main() {
 		}
 	}
 	if consumer {
-		fmt.Printf("TODO\n")
+		err := consume()
+		if err != nil {
+			panic(err)
+		}
 	}
 }
