@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/satori/go.uuid"
+	"strings"
 	"time"
 )
 
@@ -55,4 +57,23 @@ func getJson(v interface{}) (body string, e error) {
 		return body, e
 	}
 	return buffer.String(), nil
+}
+func (e *Event) loadEntity() (Entity, error) {
+	dec := json.NewDecoder(strings.NewReader(e.Body))
+	if (e.Type & TCostumer) == TCostumer {
+		c := Costumer{}
+		if err := dec.Decode(&c); err != nil {
+			return nil, err
+		}
+		return &c, nil
+
+	} else if (e.Type & TAccount) == TAccount {
+		a := Account{}
+		if err := dec.Decode(&a); err != nil {
+			return nil, err
+		}
+		return &a, nil
+	}
+	return nil, errors.New(fmt.Sprintf("Event type out of range %d", e.Type))
+
 }

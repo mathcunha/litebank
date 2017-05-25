@@ -7,6 +7,7 @@ import (
 type Entity interface {
 	create() (*Event, error)
 	newEntity() Entity
+	collection() string
 }
 
 type Costumer struct {
@@ -17,11 +18,19 @@ type Costumer struct {
 	Transactions []Transaction
 }
 
+func (c *Costumer) collection() string {
+	return "costumer"
+}
+
 type Account struct {
 	Id       string
 	Number   string
 	Balance  float64
 	Costumer Costumer
+}
+
+func (a *Account) collection() string {
+	return "account"
 }
 
 type Transaction struct {
@@ -31,6 +40,10 @@ type Transaction struct {
 	Value float64
 }
 
+func (c *Transaction) collection() string {
+	return "transaction"
+}
+
 type Event struct {
 	Type EventType
 	Body string
@@ -38,6 +51,18 @@ type Event struct {
 
 type EventType byte
 
-var NewCostumerEvent EventType = 0
-var NewAccountEvent EventType = 10
-var NewTransactionEvent EventType = 20
+const (
+	EventOne EventType = 1
+	EventMax EventType = 128
+	New                = EventMax
+	GetOne             = EventMax >> 1
+	GetAll             = (EventMax >> 1) + EventMax
+
+	TCostumer    = EventOne
+	TAccount     = EventOne << 1
+	TTransaction = (EventOne << 1) + EventOne
+
+	NewAccountEvent     = New | TAccount
+	NewCostumerEvent    = New | TCostumer
+	NewTransactionEvent = New | TTransaction
+)

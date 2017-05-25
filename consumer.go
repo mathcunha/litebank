@@ -21,7 +21,20 @@ func consume() error {
 
 	for {
 		event := <-kConsumer.c
-		log.Println(event)
+		entity, err := event.loadEntity()
+		if err != nil {
+			return err
+		}
+		if (event.Type & New) == New {
+			err = insert(entity)
+			if err != nil {
+				return err
+			}
+
+		} else {
+
+			log.Println("not persisted ", event)
+		}
 	}
 
 	return nil

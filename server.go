@@ -55,7 +55,18 @@ func (h *defaulEntityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	w.WriteHeader(http.StatusMethodNotAllowed)
-	w.Write(nil)
+	w.Write([]byte(`<!DOCTYPE html>
+	<html>
+	<head>
+	<title>Page Title</title>
+	</head>
+	<body>
+	
+	<h1>litebank</h1>
+	<p>Not so fast.</p>
+	
+	</body>
+	</html>`))
 	return
 }
 
