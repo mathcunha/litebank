@@ -2,7 +2,6 @@ package main
 
 import (
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 	"log"
 	"os"
 	"strings"
@@ -34,11 +33,7 @@ func closeSession(s *mgo.Session) {
 	s.Close()
 }
 
-func getId(id string) bson.M {
-	return bson.M{"_id": bson.ObjectIdHex(id)}
-}
-
-func findOne(document Persistent, id bson.M) error {
+func findOne(document Persistent, id string) error {
 	s, err := getSession()
 	if err != nil {
 		return err
@@ -76,7 +71,7 @@ func insert(document Persistent) error {
 	return s.DB(database).C(document.collection()).Insert(document)
 }
 
-func remove(document Persistent, id bson.M) error {
+func remove(document Persistent, id string) error {
 	s, err := getSession()
 	if err != nil {
 		return err

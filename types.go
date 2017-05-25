@@ -11,7 +11,7 @@ type Entity interface {
 }
 
 type Costumer struct {
-	Id           string
+	Id           string `bson:"_id"`
 	Name         string
 	Creation     time.Time
 	Accounts     []Account
@@ -23,7 +23,7 @@ func (c *Costumer) collection() string {
 }
 
 type Account struct {
-	Id       string
+	Id       string `bson:"_id"`
 	Number   string
 	Balance  float64
 	Costumer Costumer
@@ -34,7 +34,7 @@ func (a *Account) collection() string {
 }
 
 type Transaction struct {
-	Id    string
+	Id    string `bson:"_id"`
 	From  Costumer
 	To    Costumer
 	Value float64

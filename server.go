@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"reflect"
+	"strings"
 )
 
 type defaulEntityHandler struct {
@@ -53,6 +55,31 @@ func (h *defaulEntityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			log.Println("SEVERE: %v error returning json response %v\n", err, entity)
 		}
 		return
+	case "GET":
+		a_path := strings.Split(r.URL.Path, "/")
+
+		if "" != a_path[4] { //by id
+			entity := h.entity.newEntity()
+			findOne(entity, a_path[4])
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			if err := json.NewEncoder(w).Encode(entity); err != nil {
+				log.Println("SEVERE: %v error returning json response %v\n", err, entity)
+			}
+		} else {
+
+			entity := h.entity.newEntity()
+			entities := reflect.New(reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(entity)), 0, 0).Type())
+
+			findAll(entity.collection(), entities.Interface())
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			if err := json.NewEncoder(w).Encode(entities.Interface()); err != nil {
+				log.Println("SEVERE: %v error returning json response %v\n", err, entity)
+			}
+		}
+		return
+
 	}
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	w.Write([]byte(`<!DOCTYPE html>
