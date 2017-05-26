@@ -26,10 +26,11 @@ func consume() error {
 			return err
 		}
 		if (event.Type & New) == New {
-			err = insert(entity)
+			err = insert(entity.collection(), entity)
 			if err != nil {
 				return err
 			}
+			log.Printf("{\"EventType\":%b}\n", event.Type)
 
 		} else {
 

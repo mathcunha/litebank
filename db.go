@@ -2,14 +2,11 @@ package main
 
 import (
 	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 	"log"
 	"os"
 	"strings"
 )
-
-type Persistent interface {
-	collection() string
-}
 
 const database = "litebank"
 
@@ -33,17 +30,18 @@ func closeSession(s *mgo.Session) {
 	s.Close()
 }
 
-func findOne(document Persistent, id string) error {
+func findOne(collection string, result interface{}, id string) error {
 	s, err := getSession()
 	if err != nil {
 		return err
 	}
 	defer closeSession(s)
+	log.Printf("_id:%q", id)
 
-	return s.DB(database).C(document.collection()).Find(id).One(document)
+	return s.DB(database).C(collection).Find(bson.M{"_id": id}).One(result)
 }
 
-func findQuery(collection string, result interface{}, query interface{}) error {
+func findQuery(col string, r interface{}, query interface{}) error {
 	s, err := getSession()
 	if err != nil {
 		return err
@@ -51,14 +49,14 @@ func findQuery(collection string, result interface{}, query interface{}) error {
 
 	defer closeSession(s)
 
-	return s.DB(database).C(collection).Find(query).All(result)
+	return s.DB(database).C(col).Find(query).All(r)
 }
 
-func findAll(collection string, result interface{}) error {
-	return findQuery(collection, result, nil)
+func findAll(col string, r interface{}) error {
+	return findQuery(col, r, nil)
 }
 
-func insert(document Persistent) error {
+func insert(col string, doc interface{}) error {
 	s, err := getSession()
 	if err != nil {
 		log.Println("fuck off")
@@ -68,10 +66,10 @@ func insert(document Persistent) error {
 
 	s.SetSafe(&mgo.Safe{FSync: true})
 
-	return s.DB(database).C(document.collection()).Insert(document)
+	return s.DB(database).C(col).Insert(doc)
 }
 
-func remove(document Persistent, id string) error {
+func remove(col string, id string) error {
 	s, err := getSession()
 	if err != nil {
 		return err
@@ -80,5 +78,5 @@ func remove(document Persistent, id string) error {
 
 	s.SetSafe(&mgo.Safe{FSync: true})
 
-	return s.DB(database).C(document.collection()).Remove(id)
+	return s.DB(database).C(col).Remove(id)
 }

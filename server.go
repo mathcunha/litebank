@@ -60,9 +60,14 @@ func (h *defaulEntityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 		if "" != a_path[4] { //by id
 			entity := h.entity.newEntity()
-			findOne(entity, a_path[4])
+			if err := findOne(entity.collection(), entity, a_path[4]); err != nil {
+				http.Error(w, err.Error(), http.StatusNotFound)
+				return
+			}
+
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
+
 			if err := json.NewEncoder(w).Encode(entity); err != nil {
 				log.Println("SEVERE: %v error returning json response %v\n", err, entity)
 			}
@@ -71,9 +76,14 @@ func (h *defaulEntityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			entity := h.entity.newEntity()
 			entities := reflect.New(reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(entity)), 0, 0).Type())
 
-			findAll(entity.collection(), entities.Interface())
+			if err := findAll(entity.collection(), entities.Interface()); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
+
 			if err := json.NewEncoder(w).Encode(entities.Interface()); err != nil {
 				log.Println("SEVERE: %v error returning json response %v\n", err, entity)
 			}
