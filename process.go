@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/satori/go.uuid"
-	"strings"
 	"time"
 )
 
@@ -24,8 +22,8 @@ func newEvent(v interface{}, eventType EventType) (e *Event, err error) {
 		return nil, err
 	}
 
-	e = &Event{Type: eventType, Body: body}
-	fmt.Printf("Event(%v) - body (%v)\n", eventType, body)
+	e = &Event{Type: eventType, Payload: body}
+	fmt.Printf("Event(%v) - Payload (%v)\n", eventType, string(body))
 
 	return e, nil
 }
@@ -49,27 +47,24 @@ func (a *Account) create() (e *Event, err error) {
 	return newAccountEvent(a)
 }
 
-func getJson(v interface{}) (body string, e error) {
-	buffer := bytes.NewBufferString(body)
-	enc := json.NewEncoder(buffer)
-	e = enc.Encode(v)
+func getJson(v interface{}) ([]byte, error) {
+	body, e := json.Marshal(v)
 	if e != nil {
 		return body, e
 	}
-	return buffer.String(), nil
+	return body, nil
 }
 func (e *Event) loadEntity() (Entity, error) {
-	dec := json.NewDecoder(strings.NewReader(e.Body))
 	if (e.Type & TCostumer) == TCostumer {
 		c := Costumer{}
-		if err := dec.Decode(&c); err != nil {
+		if err := json.Unmarshal(e.Payload, &c); err != nil {
 			return nil, err
 		}
 		return &c, nil
 
 	} else if (e.Type & TAccount) == TAccount {
 		a := Account{}
-		if err := dec.Decode(&a); err != nil {
+		if err := json.Unmarshal(e.Payload, &a); err != nil {
 			return nil, err
 		}
 		return &a, nil

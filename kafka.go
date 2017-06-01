@@ -111,9 +111,7 @@ func sendEvent(kafka sarama.SyncProducer, event interface{}) error {
 		return err
 	}
 
-	log.Printf("Message: %+v\n", event)
-	log.Printf("Message is stored in partition %d, offset %d\n",
-		partition, offset)
+	log.Printf("Kafka - Message is stored in partition %d, offset %d\n", partition, offset)
 
 	return nil
 }

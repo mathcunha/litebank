@@ -45,8 +45,8 @@ func (c *Transaction) collection() string {
 }
 
 type Event struct {
-	Type EventType
-	Body string
+	Type    EventType
+	Payload []byte
 }
 
 type EventType byte
