@@ -17,7 +17,7 @@ func newConsumerEvent(c *Costumer) (e *Event, err error) {
 }
 
 func newEvent(v interface{}, eventType EventType) (e *Event, err error) {
-	body, err := getJson(v)
+	body, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
@@ -47,13 +47,6 @@ func (a *Account) create() (e *Event, err error) {
 	return newAccountEvent(a)
 }
 
-func getJson(v interface{}) ([]byte, error) {
-	body, e := json.Marshal(v)
-	if e != nil {
-		return body, e
-	}
-	return body, nil
-}
 func (e *Event) loadEntity() (Entity, error) {
 	if (e.Type & TCostumer) == TCostumer {
 		c := Costumer{}

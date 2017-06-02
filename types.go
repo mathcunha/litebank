@@ -11,11 +11,11 @@ type Entity interface {
 }
 
 type Costumer struct {
-	Id           string `bson:"_id"`
-	Name         string
-	Creation     time.Time
-	Accounts     []Account
-	Transactions []Transaction
+	Id           string        `bson:"_id"`
+	Name         string        `bson:",omitempty"`
+	Creation     time.Time     `bson:",omitempty"`
+	Accounts     []Account     `bson:",omitempty"`
+	Transactions []Transaction `bson:",omitempty"`
 }
 
 func (c *Costumer) collection() string {
@@ -27,17 +27,11 @@ type Account struct {
 	Number   string
 	Balance  float64
 	Costumer Costumer
+	Queue    []float64
 }
 
 func (a *Account) collection() string {
 	return "account"
-}
-
-type Transaction struct {
-	Id    string `bson:"_id"`
-	From  Costumer
-	To    Costumer
-	Value float64
 }
 
 func (c *Transaction) collection() string {

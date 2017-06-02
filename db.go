@@ -59,7 +59,6 @@ func findAll(col string, r interface{}) error {
 func insert(col string, doc interface{}) error {
 	s, err := getSession()
 	if err != nil {
-		log.Println("fuck off")
 		return err
 	}
 	defer closeSession(s)
