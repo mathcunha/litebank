@@ -14,9 +14,9 @@ type Transaction struct {
 
 func sameAccountTransaction(t *Transaction) (bool, error) {
 	//load the account
-	if err := findOne(t.From.collection(), (&t.From), t.From.Id); err != nil {
-		return false, err
-	}
+	loadFromAccount((&t.From))
+
+	empty := len(t.From.Queue) == 0
 
 	//process queue
 	for _, v := range t.From.Queue {
@@ -26,9 +26,16 @@ func sameAccountTransaction(t *Transaction) (bool, error) {
 
 	invalid := t.Value < 0 && t.From.Balance < -t.Value
 
-	if !invalid {
+	if invalid {
+		if !empty {
+			if err := updateFromAccount((&t.From)); err != nil {
+				return true, err
+			}
+		}
+		return false, nil
+	} else {
 		t.From.Balance += t.Value
-		if err := updateAccount(true, (&t.From)); err != nil {
+		if err := updateFromAccount((&t.From)); err != nil {
 			return true, err
 		}
 		return true, nil
@@ -60,7 +67,7 @@ func processTransaction(t *Transaction) (bool, error) {
 
 	if !invalid {
 		t.From.Balance -= t.Value
-		if err := updateAccount(true, (&t.From)); err != nil {
+		if err := updateFromAccount((&t.From)); err != nil {
 			return true, err
 		}
 		t.To.Queue = append(t.To.Queue, t.Value)
@@ -77,7 +84,26 @@ func processTransaction(t *Transaction) (bool, error) {
 	return false, nil
 }
 
-func updateAccount(updateBalance bool, a *Account) error {
+func loadFromAccount(a *Account) error {
+	s, err := getSession()
+	if err != nil {
+		return err
+	}
+	defer closeSession(s)
+
+	s.SetSafe(&mgo.Safe{FSync: true})
+
+	change := bson.M{"$rename": bson.M{"pending": "queue"}}
+	if err := s.DB(database).C(a.collection()).Update(bson.M{"_id": a.Id}, change); err != nil {
+		return err
+	}
+	if err := findOne(a.collection(), a, a.Id); err != nil {
+		return err
+	}
+	return nil
+}
+
+func updateFromAccount(a *Account) error {
 	s, err := getSession()
 	if err != nil {
 		return err
@@ -87,8 +113,22 @@ func updateAccount(updateBalance bool, a *Account) error {
 	s.SetSafe(&mgo.Safe{FSync: true})
 
 	change := bson.M{"$set": bson.M{"balance": a.Balance, "queue": a.Queue}}
+
+	return s.DB(database).C(a.collection()).Update(bson.M{"_id": a.Id}, change)
+}
+
+func updateAccount(updateBalance bool, a *Account) error {
+	s, err := getSession()
+	if err != nil {
+		return err
+	}
+	defer closeSession(s)
+
+	s.SetSafe(&mgo.Safe{FSync: true})
+
+	change := bson.M{"$set": bson.M{"balance": a.Balance, "pending": a.Queue}}
 	if !updateBalance {
-		change = bson.M{"$set": bson.M{"queue": a.Queue}}
+		change = bson.M{"$push": bson.M{"pending": a.Queue[0]}}
 	}
 
 	return s.DB(database).C(a.collection()).Update(bson.M{"_id": a.Id}, change)
