@@ -30,7 +30,7 @@ func consume() error {
 			if err != nil {
 				return err
 			}
-			log.Printf("{\"EventType\":%b}\n", event.Type)
+			log.Printf("{\"EventType\":%b - %T}\n", event.Type, entity)
 
 		} else {
 

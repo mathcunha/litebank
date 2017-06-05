@@ -10,6 +10,13 @@ type Entity interface {
 	collection() string
 }
 
+type Transaction struct {
+	Id    string `bson:"_id"`
+	From  Account
+	To    Account
+	Value float64
+}
+
 type Costumer struct {
 	Id           string        `bson:"_id"`
 	Name         string        `bson:",omitempty"`
@@ -18,16 +25,16 @@ type Costumer struct {
 	Transactions []Transaction `bson:",omitempty"`
 }
 
-func (c *Costumer) collection() string {
-	return "costumer"
-}
-
 type Account struct {
 	Id       string `bson:"_id"`
 	Number   string
 	Balance  float64
 	Costumer Costumer
 	Queue    []float64
+}
+
+func (c *Costumer) collection() string {
+	return "costumer"
 }
 
 func (a *Account) collection() string {

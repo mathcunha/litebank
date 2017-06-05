@@ -27,6 +27,7 @@ func listen() error {
 
 	http.Handle(v1Path+"costumer/", &defaulEntityHandler{&Costumer{}})
 	http.Handle(v1Path+"account/", &defaulEntityHandler{&Account{}})
+	http.Handle(v1Path+"transaction/", &defaulEntityHandler{&Transaction{}})
 	if err := http.ListenAndServe(getPort(), nil); err != nil {
 		return err
 	}

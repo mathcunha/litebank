@@ -36,7 +36,6 @@ func findOne(collection string, result interface{}, id string) error {
 		return err
 	}
 	defer closeSession(s)
-	log.Printf("_id:%q", id)
 
 	return s.DB(database).C(collection).Find(bson.M{"_id": id}).One(result)
 }
