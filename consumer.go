@@ -25,6 +25,14 @@ func consume() error {
 		if err != nil {
 			return err
 		}
+		if event.Type == NewTransactionEvent {
+			ok, err := processTransaction(entity.(*Transaction))
+			if err != nil {
+				return err
+			}
+			log.Printf("{\"EventType\":%b - %T, %v}\n", event.Type, entity, ok)
+			continue
+		}
 		if (event.Type & New) == New {
 			err = insert(entity.collection(), entity)
 			if err != nil {
