@@ -49,25 +49,24 @@ func (a *Account) create() (e *Event, err error) {
 }
 
 func (e *Event) loadEntity() (Entity, error) {
-	if (e.Type & TCostumer) == TCostumer {
-		c := Costumer{}
-		if err := json.Unmarshal(e.Payload, &c); err != nil {
+	if (e.Type & TTransaction) == TTransaction {
+		t := Transaction{}
+		if err := json.Unmarshal(e.Payload, &t); err != nil {
 			return nil, err
 		}
-		return &c, nil
-
+		return &t, nil
 	} else if (e.Type & TAccount) == TAccount {
 		a := Account{}
 		if err := json.Unmarshal(e.Payload, &a); err != nil {
 			return nil, err
 		}
 		return &a, nil
-	} else if (e.Type & TTransaction) == TTransaction {
-		t := Transaction{}
-		if err := json.Unmarshal(e.Payload, &t); err != nil {
+	} else if (e.Type & TCostumer) == TCostumer {
+		c := Costumer{}
+		if err := json.Unmarshal(e.Payload, &c); err != nil {
 			return nil, err
 		}
-		return &t, nil
+		return &c, nil
 	}
 	return nil, errors.New(fmt.Sprintf("Event type out of range %d", e.Type))
 
