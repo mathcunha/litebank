@@ -50,7 +50,7 @@ func (h *defaulEntityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		} else {
 			kProducer.c <- event
 		}
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		if err := json.NewEncoder(w).Encode(entity); err != nil {
 			log.Println("SEVERE: %v error returning json response %v\n", err, entity)
@@ -66,7 +66,7 @@ func (h *defaulEntityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 				return
 			}
 
-			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
 
 			if err := json.NewEncoder(w).Encode(entity); err != nil {
@@ -82,7 +82,7 @@ func (h *defaulEntityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 				return
 			}
 
-			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
 
 			if err := json.NewEncoder(w).Encode(entities.Interface()); err != nil {
