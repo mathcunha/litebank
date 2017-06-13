@@ -1,4 +1,7 @@
 package: github.com/mathcunha/litebank
+owners:
+- name: Matheus Cunha
+  email: mathcunha@gmail.com
 import:
 - package: github.com/Shopify/sarama
   version: ^1.12.0
